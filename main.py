@@ -6,7 +6,7 @@ API_TOKEN = "8722321473:AAGYgRQpCmXmSbqcpA1d9-QCnSK7SJ2lfhQ"
 HF_TOKEN = "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"
 
 bot = telebot.TeleBot(API_TOKEN)
-API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-video-diffusion-img2vid-xt"
+API_URL = "https://api-inference.huggingface.co/models/damo-vilab/text-to-video-ms-1.7b"
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -29,3 +29,4 @@ def get_video(message):
 if __name__ == "__main__":
     bot.infinity_polling()
     
+
