@@ -1,48 +1,31 @@
-import os
 import telebot
-from moviepy.editor import ColorClip, TextClip, CompositeVideoClip
+import requests
 
-# আপনার দেওয়া এপিআই কী সরাসরি কোডে বসানো হয়েছে
+# আপনার এপিআই কি এবং টোকেন এখানে স্থায়ীভাবে সেট করা হলো
 API_TOKEN = "8722321473:AAGYgRQpCmXmSbqcpA1d9-QCnSK7SJ2lfhQ"
+HF_TOKEN = "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"
+
 bot = telebot.TeleBot(API_TOKEN)
+API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-video-diffusion-img2vid-xt"
 
 @bot.message_handler(commands=['start'])
-def send_welcome(message):
-    bot.reply_to(message, "Welcome! Send me any English text and I will generate a video for you.")
+def start(message):
+    bot.reply_to(message, "ভিডিও জেনারেটর বটে স্বাগতম! আমাকে একটি প্রম্পট পাঠান।")
 
 @bot.message_handler(func=lambda message: True)
-def generate_video(message):
-    try:
-        user_text = message.text
-        # ইউজারকে প্রসেসিং মেসেজ পাঠানো
-        sent_msg = bot.reply_to(message, "Generating video... please wait about 1 minute.")
-
-        # ব্যাকগ্রাউন্ড সেটআপ (নীল রঙ, ৫ সেকেন্ড)
-        bg = ColorClip(size=(640, 360), color=(0, 102, 204), duration=5)
-
-        # টেক্সট লেয়ার সেটআপ
-        txt = TextClip(user_text, fontsize=60, color='white', size=(600, 300), method='caption')
-        txt = txt.set_duration(5).set_position('center')
-
-        # ভিডিও ফাইল তৈরি
-        output_file = "video.mp4"
-        final_video = CompositeVideoClip([bg, txt])
-        final_video.write_videofile(output_file, fps=24, codec="libx264")
-
-        # ভিডিওটি টেলিগ্রামে পাঠানো
-        with open(output_file, "rb") as v:
-            bot.send_video(message.chat.id, v, caption="Here is your video!")
-        
-        # প্রসেসিং মেসেজটি ডিলিট করা
-        bot.delete_message(message.chat.id, sent_msg.message_id)
-        
-        # সার্ভার থেকে ফাইলটি মুছে ফেলা (জায়গা বাঁচাতে)
-        if os.path.exists(output_file):
-            os.remove(output_file)
-
-    except Exception as e:
-        bot.reply_to(message, "Sorry, something went wrong. Try a shorter English text.")
-        print(f"Error: {e}")
+def get_video(message):
+    msg = bot.reply_to(message, "ভিডিও তৈরি হচ্ছে, ১ মিনিট অপেক্ষা করুন...")
+    
+    headers = {"Authorization": f"Bearer {HF_TOKEN}"}
+    response = requests.post(API_URL, headers=headers, json={"inputs": message.text})
+    
+    if response.status_code == 200:
+        with open("vid.mp4", "wb") as f: f.write(response.content)
+        with open("vid.mp4", "rb") as v: bot.send_video(message.chat.id, v)
+        bot.delete_message(message.chat.id, msg.message_id)
+    else:
+        bot.reply_to(message, "দুঃখিত, বর্তমানে এআই মডেলটি ব্যস্ত। কিছুক্ষণ পর আবার চেষ্টা করুন।")
 
 if __name__ == "__main__":
     bot.infinity_polling()
+    
