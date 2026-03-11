@@ -1,13 +1,10 @@
+import os
 import telebot
 import requests
 
-# আপনার এপিআই কি এবং টোকেন এখানে স্থায়ীভাবে সেট করা হলো
-API_TOKEN = "8722321473:AAGYgRQpCmXmSbqcpA1d9-QCnSK7SJ2lfhQ"
-HF_TOKEN = "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"
-
-bot = telebot.TeleBot(API_TOKEN)
+bot = telebot.TeleBot(os.getenv('BOT_TOKEN'))
+HF_TOKEN = os.getenv('HF_TOKEN')
 API_URL = "https://api-inference.huggingface.co/models/damo-vilab/text-to-video-ms-1.7b"
-
 @bot.message_handler(commands=['start'])
 def start(message):
     bot.reply_to(message, "ভিডিও জেনারেটর বটে স্বাগতম! আমাকে একটি প্রম্পট পাঠান।")
@@ -29,4 +26,5 @@ def get_video(message):
 if __name__ == "__main__":
     bot.infinity_polling()
     
+
 
