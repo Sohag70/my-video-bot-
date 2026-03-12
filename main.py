@@ -16,9 +16,9 @@ def handle_video_request(message):
     try:
         # Zeroscope মডেল ব্যবহার করে ভিডিও তৈরি
         output = replicate.run(
-            "anotherjesse/zeroscope-v2-xl:9f747673945c62801b13b84701c783929c067844e1d359647f0f62d16450f757",
-            input={"prompt": prompt}
-        )
+    "anotherjesse/zeroscope-v2-xl",
+    input={"prompt": prompt}
+)
         
         # ভিডিওটি টেলিগ্রামে পাঠানো
         if output:
@@ -29,3 +29,4 @@ def handle_video_request(message):
         bot.edit_message_text(f"দুঃখিত, সমস্যা হয়েছে: {str(e)}", chat_id, msg.message_id)
 
 bot.polling()
+
